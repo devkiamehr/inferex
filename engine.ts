@@ -1,4 +1,4 @@
-import type { syllogism, proposition, propType, propositionKey, quantity, quality, quantityKey } from "./types.js";
+import type { syllogism, proposition, propType, propositionKey, quantity, quality } from "./types.js";
 
 const propositionType: Record<propositionKey, propType> = {
     "all-true": "A",
@@ -6,10 +6,12 @@ const propositionType: Record<propositionKey, propType> = {
     "some-true": "I",
     "some-false": "O",
     "all-false": "E",
-    "no-false": "A"
+    "no-false": "A",
+    "singular-true": "A",
+    "singular-false": "E"
 }
 
-const quantityPatternKey: Record<string, quantityKey> = {
+const quantityPatternKey: Record<string, quantity> = {
     "all": "all",
     "every": "all",
     "each": "all",
@@ -46,11 +48,6 @@ const parser = (premise: string[]) => {
     let quantity: quantity | undefined;
     let subject: string | undefined;
     let predicate: string | undefined;
-    let quantityIndex: number;
-    let subjectIndex: number[] = [];
-    let qualityIndex: number[] = [];
-    let predicateIndex: number[] = [];
-    let cleanPremise: string[] = [];
     if (premise.length < 3) {
         throw new Error("Invalid sentence: premise must be at least 3 words.");
         return;
@@ -85,23 +82,13 @@ const parser = (premise: string[]) => {
     //assigning
     for (let i = 0; i < premise.length; i++) {
         //assigning quantity
-        if (universalPattern.includes(premise[i]!)) {
-            quantity = "universal";
+        if (quantityPattern.includes(premise[i]!)) {
             const cleaned = quantityPatternKey[premise[i]!];
             if (!cleaned) {
                 throw new Error("Something went wrong parsing.");
                 return;
             }
-            cleanPremise.push(cleaned);
-            continue;
-        } else if (particularPattern.includes(premise[i]!)) {
-            quantity = "particular";
-            const cleaned = quantityPatternKey[premise[i]!];
-            if (!cleaned) {
-                throw new Error("Something went wrong parsing.");
-                return;
-            }
-            cleanPremise.push(cleaned);
+            quantity = cleaned;
             continue;
         }
         
@@ -138,5 +125,19 @@ const parser = (premise: string[]) => {
         }
     }
 
-    
+    if (quantity === undefined || quality === undefined || subject === undefined || predicate === undefined) {
+        throw new Error("Something went wrong parsing quantity and quality.");
+        return;
+    }
+    const propTypeKey: propositionKey = `${quantity}-${quality}`;
+    proptype = propositionType[propTypeKey];
+
+    const cleanedPropostion: proposition = {
+        propType: proptype,
+        quantity: quantity,
+        quality: quality,
+        subject: subject,
+        predicate: predicate
+    }
+    return cleanedPropostion;
 }

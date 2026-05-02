@@ -3,7 +3,7 @@ type propType = "A" | "E" | "I" | "O";
 type role = "major" | "minor";
 type quantity = "all" | "some" | "no" | "singular";
 type quality = true | false;
-type propositionKey = "all-true" | "no-true" | "some-true" | "some-false" | "all-false" | "no-false";
+type propositionKey = "all-true" | "no-true" | "some-true" | "some-false" | "all-false" | "no-false" | "singular-true" | "singular-false";
 
 type syllogism = {
     lineOne: string;
